@@ -6,7 +6,6 @@
 [![Evaluation](https://img.shields.io/badge/Lab_Evaluation-Problem_10-critical)](https://github.com/manasa-vasare/Performance-Analysis-of-Kubernetes-Resource-Configurations)
 
 > **KLE Technological University — Cloud Computing Lab Evaluation 2**  
-> **Course:** Kubernetes & Microservices Deployment  
 > **Topic:** Problem 10 — Performance Analysis of Kubernetes Resource Configurations  
 > **Repository:** [Performance-Analysis-of-Kubernetes-Resource-Configurations](https://github.com/manasa-vasare/Performance-Analysis-of-Kubernetes-Resource-Configurations.git)  
 > **Status:** 100% Verified on Kubernetes Cluster  
