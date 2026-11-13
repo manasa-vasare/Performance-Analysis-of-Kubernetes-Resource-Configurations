@@ -1,0 +1,45 @@
+================================================================================
+KUBERNETES RESOURCE METRICS: CFS CPU THROTTLING EVIDENCE (cgroup v2)
+Namespace: k8s-performance
+Date: 2026-11-13
+================================================================================
+
+1. RESTRICTED DEPLOYMENT (limits.cpu: 100m, requests.cpu: 50m)
+Command: kubectl exec -n k8s-performance performance-restricted-f7d84b97b-tqrv2 -- cat /sys/fs/cgroup/cpu.stat
+
+--- Output ---
+usage_usec 57367769
+user_usec 45463080
+system_usec 11904689
+nr_periods 8041
+nr_throttled 5516
+throttled_usec 1604921082
+nr_bursts 0
+burst_usec 0
+
+Key Finding:
+- Total CFS scheduling periods: 8,041
+- Throttled periods: 5,516 (Throttling frequency: 68.6%)
+- Total duration throttled: 1,604.92 seconds
+- Explanation: The CFS quota strictly enforces 10ms of CPU per 100ms period. The CPU-intensive loop (/work) rapidly consumes the quota, resulting in massive kernel throttling and a latency surge from 9s to 64s.
+
+--------------------------------------------------------------------------------
+
+2. BASELINE DEPLOYMENT (limits.cpu: 500m, requests.cpu: 100m)
+Command: kubectl exec -n k8s-performance performance-baseline-7bb6f44677-cc4td -- cat /sys/fs/cgroup/cpu.stat
+
+--- Output ---
+usage_usec 4894424
+user_usec 1733531
+system_usec 3160892
+nr_periods 489
+nr_throttled 80
+throttled_usec 1112558
+nr_bursts 0
+burst_usec 0
+
+Key Finding:
+- Total CFS scheduling periods: 489
+- Throttled periods: 80
+- Total duration throttled: 1.11 seconds
+- Explanation: With a 500m quota (50ms per 100ms period), the pod processes work with minimal throttling, sustaining high throughput (2.47 req/s).

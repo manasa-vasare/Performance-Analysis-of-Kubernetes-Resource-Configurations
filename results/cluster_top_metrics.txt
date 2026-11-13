@@ -1,0 +1,18 @@
+================================================================================
+KUBERNETES RESOURCE METRICS: POD CONSUMPTION (kubectl top)
+Namespace: k8s-performance
+Date: 2026-11-13
+================================================================================
+
+Command: kubectl top pods -n k8s-performance
+
+--- Output ---
+NAME                                     CPU(cores)   MEMORY(bytes)   
+performance-baseline-7bb6f44677-cc4td    480m         48Mi            # Under active workload
+performance-restricted-f7d84b97b-tqrv2   98m          38Mi            # Clamped at 100m limit
+performance-oom-5f8f9f4796-7krpf         99m          6Mi             # Post-restart idle
+
+Key Finding:
+1. Baseline pod scales CPU usage freely up to ~480m (within its 500m limit) to absorb incoming compute requests rapidly.
+2. Restricted pod is strictly constrained to ~98m (at its 100m limit), causing backlog and extreme tail latency.
+3. Memory consumption remains modest (~38-48Mi) during standard execution, explaining why the 128Mi/256Mi limits never triggered OOMKills in Configs 1 and 2.

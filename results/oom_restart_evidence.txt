@@ -1,0 +1,54 @@
+================================================================================
+KUBERNETES RESOURCE METRICS: POD RESTARTS & OOMKILLED EVIDENCE
+Namespace: k8s-performance
+Deployment: performance-oom (limits.memory: 15Mi, requests.memory: 10Mi)
+Date: 2026-11-13
+================================================================================
+
+1. POD STATUS AND RESTARTS
+Command: kubectl get pods -n k8s-performance
+
+--- Output ---
+NAME                                     READY   STATUS    RESTARTS     AGE
+performance-baseline-7bb6f44677-cc4td    1/1     Running   0            13m
+performance-oom-5f8f9f4796-7krpf         1/1     Running   1 (9s ago)   48s
+performance-restricted-f7d84b97b-tqrv2   1/1     Running   0            82m
+
+Key Finding:
+- The performance-oom pod clearly shows RESTARTS: 1.
+- Both performance-baseline and performance-restricted show RESTARTS: 0.
+
+--------------------------------------------------------------------------------
+
+2. TERMINATION REASON (OOMKILLED INSPECTION)
+Command: kubectl describe pod performance-oom-5f8f9f4796-7krpf -n k8s-performance
+
+--- Output Snippet ---
+Containers:
+  flask-app:
+    Container ID:   containerd://665573d065be70a9d878578136e1479295b76f91b661e739360f397b46c74ff1
+    Image:          k8s-performance:v1
+    Image ID:       docker.io/library/import-2026-11-13@sha256:83e0b5612e27f7e365d051cf51016ad091859f43d205ab962a84be17e1483abc
+    Port:           5000/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Fri, 13 Nov 2026 17:21:07 +0530
+    Last State:     Terminated
+      Reason:       OOMKilled
+      Exit Code:    137
+      Started:      Fri, 13 Nov 2026 17:20:30 +0530
+      Finished:     Fri, 13 Nov 2026 17:20:59 +0530
+    Ready:          True
+    Restart Count:  1
+    Limits:
+      cpu:     100m
+      memory:  15Mi
+    Requests:
+      cpu:        50m
+      memory:     10Mi
+
+Key Finding:
+- Reason: OOMKilled
+- Exit Code: 137 (128 + Signal 9 SIGKILL)
+- Restart Count: 1
+- Explanation: The container was allocated a 15Mi memory limit. When memory allocation exceeded 15Mi, the Linux kernel Out-Of-Memory Killer immediately terminated the container with SIGKILL (Exit Code 137), triggering a Kubernetes pod restart.
